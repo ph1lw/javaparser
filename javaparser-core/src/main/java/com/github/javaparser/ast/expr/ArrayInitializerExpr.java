@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -39,7 +39,7 @@ import com.github.javaparser.ast.Generated;
  * The initialization of an array. In the following sample, the outer { } is an ArrayInitializerExpr.
  * It has two expressions inside: two ArrayInitializerExprs.
  * These have two expressions each, one has 1 and 1, the other two and two.
- * <br/><code>new int[][]{{1, 1}, {2, 2}};</code>
+ * <br>{@code new int[][]{{1, 1}, {2, 2}};}
  *
  * @author Julio Vilmar Gesser
  */

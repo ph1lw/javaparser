@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -37,11 +37,11 @@ import static com.github.javaparser.utils.StringEscapeUtils.*;
 
 /**
  * A literal string.
- * <br/><code>"Hello World!"</code>
- * <br/><code>"\"\n"</code>
- * <br/><code>"\u2122"</code>
- * <br/><code>"™"</code>
- * <br/><code>"💩"</code>
+ * <br>{@code "Hello World!"}
+ * <br>{@code "\"\n"}
+ * <br>{@code "\u2122"}
+ * <br>{@code "™"}
+ * <br>{@code "💩"}
  *
  * @author Julio Vilmar Gesser
  */

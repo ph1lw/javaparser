@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015-2016 Federico Tomassetti
- * Copyright (C) 2017-2019 The JavaParser Team.
+ * Copyright (C) 2017-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -28,7 +28,6 @@ import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.*;
 import com.github.javaparser.resolution.types.*;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.core.resolution.Context;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
@@ -79,6 +78,7 @@ public class MethodCallExprContext extends AbstractJavaParserContext<MethodCallE
 
     @Override
     public Optional<MethodUsage> solveMethodAsUsage(String name, List<ResolvedType> argumentsTypes) {
+        ResolvedType typeOfScope;
         if (wrappedNode.getScope().isPresent()) {
             Expression scope = wrappedNode.getScope().get();
             // Consider static method calls
@@ -99,30 +99,28 @@ public class MethodCallExprContext extends AbstractJavaParserContext<MethodCallE
                 }
             }
 
-            ResolvedType typeOfScope = JavaParserFacade.get(typeSolver).getType(scope);
-            // we can replace the parameter types from the scope into the typeParametersValues
-
-            Map<ResolvedTypeParameterDeclaration, ResolvedType> inferredTypes = new HashMap<>();
-            for (int i = 0; i < argumentsTypes.size(); i++) {
-                // by replacing types I can also find new equivalences
-                // for example if I replace T=U with String because I know that T=String I can derive that also U equal String
-                ResolvedType originalArgumentType = argumentsTypes.get(i);
-                ResolvedType updatedArgumentType = usingParameterTypesFromScope(typeOfScope, originalArgumentType, inferredTypes);
-                argumentsTypes.set(i, updatedArgumentType);
-            }
-            for (int i = 0; i < argumentsTypes.size(); i++) {
-                ResolvedType updatedArgumentType = applyInferredTypes(argumentsTypes.get(i), inferredTypes);
-                argumentsTypes.set(i, updatedArgumentType);
-            }
-
-            return solveMethodAsUsage(typeOfScope, name, argumentsTypes, this);
+            // Scope is present -- search/solve within that type
+            typeOfScope = JavaParserFacade.get(typeSolver).getType(scope);
         } else {
-            Context parentContext = getParent();
-            while (parentContext instanceof MethodCallExprContext || parentContext instanceof ObjectCreationContext) {
-                parentContext = parentContext.getParent();
-            }
-            return parentContext.solveMethodAsUsage(name, argumentsTypes);
+            // Scope not present -- search/solve within itself.
+            typeOfScope = JavaParserFacade.get(typeSolver).getTypeOfThisIn(wrappedNode);
         }
+
+        // we can replace the parameter types from the scope into the typeParametersValues
+        Map<ResolvedTypeParameterDeclaration, ResolvedType> inferredTypes = new HashMap<>();
+        for (int i = 0; i < argumentsTypes.size(); i++) {
+            // by replacing types I can also find new equivalences
+            // for example if I replace T=U with String because I know that T=String I can derive that also U equal String
+            ResolvedType originalArgumentType = argumentsTypes.get(i);
+            ResolvedType updatedArgumentType = usingParameterTypesFromScope(typeOfScope, originalArgumentType, inferredTypes);
+            argumentsTypes.set(i, updatedArgumentType);
+        }
+        for (int i = 0; i < argumentsTypes.size(); i++) {
+            ResolvedType updatedArgumentType = applyInferredTypes(argumentsTypes.get(i), inferredTypes);
+            argumentsTypes.set(i, updatedArgumentType);
+        }
+
+        return solveMethodAsUsage(typeOfScope, name, argumentsTypes, this);
     }
 
     private MethodUsage resolveMethodTypeParametersFromExplicitList(TypeSolver typeSolver, MethodUsage methodUsage) {
@@ -145,12 +143,14 @@ public class MethodCallExprContext extends AbstractJavaParserContext<MethodCallE
 
     @Override
     public SymbolReference<? extends ResolvedValueDeclaration> solveSymbol(String name) {
-        return getParent().solveSymbol(name);
+        return getParent()
+                .orElseThrow(() -> new RuntimeException("Parent context unexpectedly empty."))
+                .solveSymbol(name);
     }
 
     @Override
     public Optional<Value> solveSymbolAsValue(String name) {
-        Context parentContext = getParent();
+        Context parentContext = getParent().orElseThrow(() -> new RuntimeException("Parent context unexpectedly empty."));
         return parentContext.solveSymbolAsValue(name);
     }
 
@@ -163,7 +163,7 @@ public class MethodCallExprContext extends AbstractJavaParserContext<MethodCallE
             // we don't make this _ex_plicit in the data representation because that would affect codegen
             // and make everything generate like <T extends Object> instead of <T>
             // https://github.com/javaparser/javaparser/issues/2044
-            rrtds = Collections.singleton(typeSolver.solveType(Object.class.getCanonicalName()));
+            rrtds = Collections.singleton(typeSolver.getSolvedJavaLangObject());
         }
 
         for (ResolvedReferenceTypeDeclaration rrtd : rrtds) {
@@ -183,7 +183,11 @@ public class MethodCallExprContext extends AbstractJavaParserContext<MethodCallE
     private Optional<MethodUsage> solveMethodAsUsage(ResolvedReferenceType refType, String name,
                                                      List<ResolvedType> argumentsTypes,
                                                      Context invokationContext) {
-        Optional<MethodUsage> ref = ContextHelper.solveMethodAsUsage(refType.getTypeDeclaration(), name, argumentsTypes, invokationContext, refType.typeParametersValues());
+        if(!refType.getTypeDeclaration().isPresent()) {
+            return Optional.empty();
+        }
+
+        Optional<MethodUsage> ref = ContextHelper.solveMethodAsUsage(refType.getTypeDeclaration().get(), name, argumentsTypes, invokationContext, refType.typeParametersValues());
         if (ref.isPresent()) {
             MethodUsage methodUsage = ref.get();
 
@@ -211,8 +215,12 @@ public class MethodCallExprContext extends AbstractJavaParserContext<MethodCallE
             for (int i = 0; i < methodUsage.getParamTypes().size(); i++) {
                 ResolvedParameterDeclaration parameter = methodUsage.getDeclaration().getParam(i);
                 ResolvedType parameterType = parameter.getType();
-                if (parameter.isVariadic()) {
-                	parameterType = parameterType.asArrayType().getComponentType();
+                // Don't continue if a vararg parameter is reached and there are no arguments left
+                if (parameter.isVariadic() && argumentsTypes.size() < methodUsage.getNoParams()) {
+                    break;
+                }
+                if (!argumentsTypes.get(i).isArray() && parameter.isVariadic()) {
+                    parameterType = parameterType.asArrayType().getComponentType();
                 }
                 inferTypes(argumentsTypes.get(i), parameterType, derivedValues);
             }
@@ -307,6 +315,10 @@ public class MethodCallExprContext extends AbstractJavaParserContext<MethodCallE
         }
         if (source.isTypeVariable() && target.isTypeVariable()) {
             mappings.put(target.asTypeParameter(), source);
+            return;
+        }
+        if (source.isTypeVariable()) {
+            inferTypes(target, source, mappings);
             return;
         }
         if (source.isPrimitive() || target.isPrimitive()) {

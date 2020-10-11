@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015-2016 Federico Tomassetti
- * Copyright (C) 2017-2019 The JavaParser Team.
+ * Copyright (C) 2017-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -38,7 +38,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.declarators.VariableSy
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.SymbolDeclarator;
 
-import static com.github.javaparser.symbolsolver.javaparser.Navigator.requireParentNode;
+import static com.github.javaparser.symbolsolver.javaparser.Navigator.demandParentNode;
 
 /**
  * @author Federico Tomassetti
@@ -48,6 +48,8 @@ public class JavaParserFactory {
     public static Context getContext(Node node, TypeSolver typeSolver) {
         if (node == null) {
             throw new NullPointerException("Node should not be null");
+        } else if (node instanceof AnnotationDeclaration) {
+            return new AnnotationDeclarationContext((AnnotationDeclaration) node, typeSolver);
         } else if (node instanceof BlockStmt) {
             return new BlockStmtContext((BlockStmt) node, typeSolver);
         } else if (node instanceof CompilationUnit) {
@@ -66,6 +68,8 @@ public class JavaParserFactory {
             return new ClassOrInterfaceDeclarationContext((ClassOrInterfaceDeclaration) node, typeSolver);
         } else if (node instanceof MethodCallExpr) {
             return new MethodCallExprContext((MethodCallExpr) node, typeSolver);
+        } else if (node instanceof MethodReferenceExpr) {
+            return new MethodReferenceExprContext((MethodReferenceExpr) node, typeSolver);
         } else if (node instanceof EnumDeclaration) {
             return new EnumDeclarationContext((EnumDeclaration) node, typeSolver);
         } else if (node instanceof FieldAccessExpr) {
@@ -89,19 +93,27 @@ public class JavaParserFactory {
             return new ObjectCreationContext((ObjectCreationExpr)node, typeSolver);
         } else {
             if (node instanceof NameExpr) {
-                // to resolve a name when in a fieldAccess context, we can get to the grand parent to prevent a infinite loop if the name is the same as the field (ie x.x)
-                if (node.getParentNode().isPresent() && node.getParentNode().get() instanceof FieldAccessExpr && node.getParentNode().get().getParentNode().isPresent()) {
-                    return getContext(node.getParentNode().get().getParentNode().get(), typeSolver);
+                // to resolve a name when in a fieldAccess context, we can go up until we get a node other than FieldAccessExpr,
+                // in order to prevent a infinite loop if the name is the same as the field (ie x.x, x.y.x, or x.y.z.x)
+                if (node.getParentNode().isPresent() && node.getParentNode().get() instanceof FieldAccessExpr) {
+                    Node ancestor = node.getParentNode().get();
+                    while (ancestor.getParentNode().isPresent()) {
+                        ancestor = ancestor.getParentNode().get();
+                        if (!(ancestor instanceof FieldAccessExpr)) {
+                            break;
+                        }
+                    }
+                    return getContext(ancestor, typeSolver);
                 }
                 if (node.getParentNode().isPresent() && node.getParentNode().get() instanceof ObjectCreationExpr && node.getParentNode().get().getParentNode().isPresent()) {
                     return getContext(node.getParentNode().get().getParentNode().get(), typeSolver);
                 }
             }
-            final Node parentNode = requireParentNode(node);
+            final Node parentNode = demandParentNode(node);
             if (parentNode instanceof ObjectCreationExpr
                     && (node == ((ObjectCreationExpr) parentNode).getType()
                         || ((ObjectCreationExpr) parentNode).getArguments().contains(node))) {
-                return getContext(requireParentNode(parentNode), typeSolver);
+                return getContext(demandParentNode(parentNode), typeSolver);
             }
             if (parentNode == null) {
                 throw new IllegalStateException("The AST node does not appear to be inserted in a propert AST, therefore we cannot resolve symbols correctly");
@@ -131,7 +143,7 @@ public class JavaParserFactory {
             return new NoSymbolDeclarator<>(node, typeSolver);
         }
     }
-    
+
     public static ResolvedReferenceTypeDeclaration toTypeDeclaration(Node node, TypeSolver typeSolver) {
         if (node instanceof ClassOrInterfaceDeclaration) {
             if (((ClassOrInterfaceDeclaration) node).isInterface()) {

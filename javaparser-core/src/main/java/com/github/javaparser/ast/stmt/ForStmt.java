@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -43,9 +43,9 @@ import com.github.javaparser.ast.Generated;
  * <h1>The classic for statement</h1>
  * Examples:
  * <ol>
- * <li><code>for(int a=3, b=5; a<99; a++, b++) hello();</code></li>
- * <li><code>for(a=3, b=5; a<99; a++) { hello(); }</code> </li>
- * <li><code>for(a(),b();;) hello();</code> </li>
+ * <li>{@code for(int a=3, b=5; a<99; a++, b++) hello();}</li>
+ * <li>{@code for(a=3, b=5; a<99; a++) { hello(); }} </li>
+ * <li>{@code for(a(),b();;) hello();} </li>
  * </ol>
  * <ul>
  * <li><i>initialization</i> is a list of expressions.

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -50,9 +50,9 @@ import static com.github.javaparser.utils.Utils.assertNotNull;
 import com.github.javaparser.ast.Generated;
 
 /**
- * The "int id();" in <code>@interface X { int id(); }</code>
+ * The "int id();" in {@code @interface X { int id(); }}
  * <p>
- * <br/>All annotations preceding the type will be set on this object, not on the type. JavaParser doesn't know if it
+ * <br>All annotations preceding the type will be set on this object, not on the type. JavaParser doesn't know if it
  * they are applicable to the method or the type.
  *
  * @author Julio Vilmar Gesser

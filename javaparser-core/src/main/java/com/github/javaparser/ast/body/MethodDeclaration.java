@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -47,10 +47,10 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.Generated;
 
 /**
- * A method declaration. "public int abc() {return 1;}" in this example: <code>class X { public int abc() {return 1;}
- * }</code>
+ * A method declaration. "public int abc() {return 1;}" in this example: {@code class X { public int abc() {return 1;}
+ * }}
  * <p>
- * <br/>All annotations preceding the return type will be set on this object, not on the return type.
+ * <br>All annotations preceding the return type will be set on this object, not on the return type.
  * JavaParser doesn't know if it they are applicable to the method or the type.
  *
  * @author Julio Vilmar Gesser

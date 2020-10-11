@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -40,10 +40,10 @@ import com.github.javaparser.ast.Generated;
 /**
  * An expression where an operator is applied to a single expression.
  * It supports the operators that are found in the UnaryExpr.Operator enum.
- * <br/><code>11++</code>
- * <br/><code>++11</code>
- * <br/><code>~1</code>
- * <br/><code>-333</code>
+ * <br>{@code 11++}
+ * <br>{@code ++11}
+ * <br>{@code ~1}
+ * <br>{@code -333}
  *
  * @author Julio Vilmar Gesser
  */

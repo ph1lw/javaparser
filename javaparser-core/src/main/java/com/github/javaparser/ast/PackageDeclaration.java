@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -37,8 +37,8 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * A package declaration.
- * <br/><code>package com.github.javaparser.ast;</code>
- * <br/><code>@Wonderful package anything.can.be.annotated.nowadays;</code>
+ * <br>{@code package com.github.javaparser.ast;}
+ * <br>{@code @Wonderful package anything.can.be.annotated.nowadays;}
  *
  * @author Julio Vilmar Gesser
  */
@@ -86,9 +86,9 @@ public class PackageDeclaration extends Node implements NodeWithAnnotations<Pack
 
     /**
      * Retrieves the list of annotations declared before the package
-     * declaration. Return <code>null</code> if there are no annotations.
+     * declaration. Return {@code null} if there are no annotations.
      *
-     * @return list of annotations or <code>null</code>
+     * @return list of annotations or {@code null}
      */
     @Generated("com.github.javaparser.generator.core.node.PropertyGenerator")
     public NodeList<AnnotationExpr> getAnnotations() {

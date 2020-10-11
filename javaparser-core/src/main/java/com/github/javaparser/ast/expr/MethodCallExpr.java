@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -46,7 +46,7 @@ import java.util.function.Consumer;
 import com.github.javaparser.ast.Generated;
 
 /**
- * A method call on an object or a class. <br/><code>circle.circumference()</code> <br/>In <code>a.&lt;String&gt;bb(15);</code> a
+ * A method call on an object or a class. <br>{@code circle.circumference()} <br>In <code>a.&lt;String&gt;bb(15);</code> a
  * is the scope, String is a type argument, bb is the name and 15 is an argument.
  *
  * @author Julio Vilmar Gesser

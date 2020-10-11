@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -558,7 +558,7 @@ public abstract class Expression extends Node {
     }
 
     /**
-     * This constructor is used by the parser and is considered private.
+     * returns the type associated with the node.
      */
     public ResolvedType calculateResolvedType() {
         return getSymbolResolver().calculateType(this);

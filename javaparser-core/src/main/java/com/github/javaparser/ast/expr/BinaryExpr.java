@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -38,8 +38,8 @@ import com.github.javaparser.ast.Generated;
 /**
  * An expression with an expression on the left, an expression on the right, and an operator in the middle.
  * It supports the operators that are found the the BinaryExpr.Operator enum.
- * <br/><code>a && b</code>
- * <br/><code>155 * 33</code>
+ * <br>{@code a && b}
+ * <br>{@code 155 * 33}
  *
  * @author Julio Vilmar Gesser
  */

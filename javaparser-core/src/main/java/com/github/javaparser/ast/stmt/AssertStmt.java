@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -39,7 +39,7 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * A usage of the keyword "assert"
- * <br/>In <code>assert dead : "Wasn't expecting to be dead here";</code> the check is "dead" and the message is the string.
+ * <br>In {@code assert dead : "Wasn't expecting to be dead here";} the check is "dead" and the message is the string.
  * @author Julio Vilmar Gesser
  */
 public class AssertStmt extends Statement {

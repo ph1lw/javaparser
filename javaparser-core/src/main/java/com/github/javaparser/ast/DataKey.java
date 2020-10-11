@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -30,9 +30,9 @@ package com.github.javaparser.ast;
  * So, the correct way to declare a DataKey is like this:
  * <p>
  * <pre>
- * <code>
- * public static final DataKey&lt;Role&gt; ROLE = new DataKey&lt;Role&gt;() { };
- * </code>
+ * {@code
+ * public static final DataKey<Role> ROLE = new DataKey<Role>() { };
+ * }
  * </pre>
  * <p>
  * This code was taken from the <a href="http://wicket.apache.org/">Wicket project</a>.

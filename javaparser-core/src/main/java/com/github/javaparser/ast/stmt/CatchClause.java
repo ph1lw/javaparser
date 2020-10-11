@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -38,8 +38,8 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.Generated;
 
 /**
- * The catch part of a try-catch-finally. <br/>In <code>try { ... } catch (Exception e) { ... }</code> the CatchClause
- * is <code>catch (Exception e) { ... }</code>. Exception e is the parameter. The { ... } is the body.
+ * The catch part of a try-catch-finally. <br>In {@code try { ... } catch (Exception e) { ... }} the CatchClause
+ * is {@code catch (Exception e) { ... }}. Exception e is the parameter. The { ... } is the body.
  *
  * @author Julio Vilmar Gesser
  */

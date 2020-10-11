@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -40,7 +40,7 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * Usage of the synchronized keyword.
- * <br/>In <code>synchronized (a123) { ... }</code> the expression is a123 and { ... } is the body
+ * <br>In {@code synchronized (a123) { ... }} the expression is a123 and { ... } is the body
  *
  * @author Julio Vilmar Gesser
  */

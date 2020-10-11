@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -26,7 +26,7 @@ import com.github.javaparser.ast.visitor.VoidVisitor;
 import java.util.function.Function;
 
 import static com.github.javaparser.printer.PrettyPrinterConfiguration.IndentType.SPACES;
-import static com.github.javaparser.utils.Utils.EOL;
+import static com.github.javaparser.utils.Utils.SYSTEM_EOL;
 import static com.github.javaparser.utils.Utils.assertNonNegative;
 import static com.github.javaparser.utils.Utils.assertNotNull;
 import static com.github.javaparser.utils.Utils.assertPositive;
@@ -57,7 +57,7 @@ public class PrettyPrinterConfiguration {
          *
          * \tvoid bar() {
          * \t\tfoo().bar()
-         * \t\t......baz(() -> {
+         * \t\t......baz(() -*&gt; {
          * \t\t..........\tboo().baa()
          * \t\t..........\t......bee(a,
          * \t\t..........\t..........b,
@@ -76,12 +76,23 @@ public class PrettyPrinterConfiguration {
     private boolean orderImports = false;
     private boolean printComments = true;
     private boolean printJavadoc = true;
+    private boolean spaceAroundOperators = true;
     private boolean columnAlignParameters = false;
     private boolean columnAlignFirstMethodChain = false;
+    /**
+     * Indent the case when it is true, don't if false
+     * switch(x) {            switch(x) {
+     *    case 1:             case 1:
+     *        return y;           return y;
+     *    case 2:             case 2:
+     *        return z;           return x;
+     *}                       }
+     */
+    private boolean indentCaseInSwitch = true;
     private IndentType indentType = SPACES;
     private int tabWidth = 4;
     private int indentSize = 4;
-    private String endOfLineCharacter = EOL;
+    private String endOfLineCharacter = SYSTEM_EOL;
     private Function<PrettyPrinterConfiguration, VoidVisitor<Void>> visitorFactory = PrettyPrintVisitor::new;
     private int maxEnumConstantsToAlignHorizontally = DEFAULT_MAX_ENUM_CONSTANTS_TO_ALIGN_HORIZONTALLY;
 
@@ -137,6 +148,8 @@ public class PrettyPrinterConfiguration {
         return this;
     }
 
+
+
     /**
      * Get the tab width for pretty aligning.
      */
@@ -163,6 +176,8 @@ public class PrettyPrinterConfiguration {
     public boolean isIgnoreComments() {
         return !printComments;
     }
+    
+    public boolean isSpaceAroundOperators() { return spaceAroundOperators; }
 
     public boolean isPrintJavadoc() {
         return printJavadoc;
@@ -172,9 +187,12 @@ public class PrettyPrinterConfiguration {
         return columnAlignParameters;
     }
 
-    public boolean isColumnAlignFirstMethodChain() {
-        return columnAlignFirstMethodChain;
+    public boolean isColumnAlignFirstMethodChain() { return columnAlignFirstMethodChain; }
+
+    public boolean isIndentCaseInSwitch() {
+        return indentCaseInSwitch;
     }
+
 
     /**
      * When true, all comments will be printed, unless printJavadoc is false, then only line and block comments will be
@@ -193,6 +211,14 @@ public class PrettyPrinterConfiguration {
         return this;
     }
 
+    /**
+     * Set if there should be spaces between operators
+     */
+    public PrettyPrinterConfiguration setSpaceAroundOperators(boolean spaceAroundOperators){
+        this.spaceAroundOperators = spaceAroundOperators;
+        return this;
+    }
+
     public PrettyPrinterConfiguration setColumnAlignParameters(boolean columnAlignParameters) {
         this.columnAlignParameters = columnAlignParameters;
         return this;
@@ -200,6 +226,11 @@ public class PrettyPrinterConfiguration {
 
     public PrettyPrinterConfiguration setColumnAlignFirstMethodChain(boolean columnAlignFirstMethodChain) {
         this.columnAlignFirstMethodChain = columnAlignFirstMethodChain;
+        return this;
+    }
+
+    public PrettyPrinterConfiguration setIndentCaseInSwitch(boolean indentInSwitch) {
+        this.indentCaseInSwitch = indentInSwitch;
         return this;
     }
 
@@ -235,6 +266,8 @@ public class PrettyPrinterConfiguration {
         this.orderImports = orderImports;
         return this;
     }
+
+
 
     public int getMaxEnumConstantsToAlignHorizontally() {
         return maxEnumConstantsToAlignHorizontally;

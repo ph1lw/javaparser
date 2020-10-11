@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -35,7 +35,7 @@ import java.util.Optional;
 import com.github.javaparser.ast.Generated;
 
 /**
- * An annotation that has a single value. <br/><code>@Count(15)</code>
+ * An annotation that has a single value. <br>{@code @Count(15)}
  *
  * @author Julio Vilmar Gesser
  */

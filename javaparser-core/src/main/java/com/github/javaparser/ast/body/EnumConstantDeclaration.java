@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -44,7 +44,7 @@ import java.util.Optional;
 import com.github.javaparser.ast.Generated;
 
 /**
- * One of the values an enum can take. A(1) and B(2) in this example: <code>enum X { A(1), B(2) }</code>
+ * One of the values an enum can take. A(1) and B(2) in this example: {@code enum X { A(1), B(2) }}
  *
  * @author Julio Vilmar Gesser
  */

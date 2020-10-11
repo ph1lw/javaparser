@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -25,7 +25,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.validator.chunks.ModifierValidator;
 
 /**
- * This validator validates according to Java 7 syntax rules.
+ * This validator validates according to Java 8 syntax rules.
  */
 public class Java8Validator extends Java7Validator {
     final Validator modifiersWithoutPrivateInterfaceMethods = new ModifierValidator(true, true, false);

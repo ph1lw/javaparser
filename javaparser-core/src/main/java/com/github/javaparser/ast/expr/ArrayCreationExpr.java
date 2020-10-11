@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -41,10 +41,10 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.Generated;
 
 /**
- * <code>new int[5][4][][]</code> or <code>new int[][]{{1},{2,3}}</code>.
+ * {@code new int[5][4][][]} or <code>new int[][]{{1},{2,3}}</code>.
  *
- * <br/>"int" is the element type.
- * <br/>All the brackets are stored in the levels field, from left to right.
+ * <br>"int" is the element type.
+ * <br>All the brackets are stored in the levels field, from left to right.
  *
  * @author Julio Vilmar Gesser
  */

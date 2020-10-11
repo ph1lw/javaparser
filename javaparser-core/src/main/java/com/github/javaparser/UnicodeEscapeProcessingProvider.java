@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -118,7 +118,7 @@ public class UnicodeEscapeProcessingProvider implements Provider {
 	/** 
 	 * Produces the next un-escaped character to be written to the output.
 	 * 
-	 * @return The next character or <code>-1</code> if no more characters are available.
+	 * @return The next character or {@code -1} if no more characters are available.
 	 */
 	private int nextOutputChar() throws IOException {
 		int next = nextInputChar();
@@ -246,7 +246,7 @@ public class UnicodeEscapeProcessingProvider implements Provider {
 	/** 
 	 * Processes column/line information from the input file.
 	 * 
-	 * @return The next character or <code>-1</code> if no more input is available.
+	 * @return The next character or {@code -1} if no more input is available.
 	 */
 	private int nextInputChar() throws IOException {
 		int result = nextBufferedChar();
@@ -256,7 +256,7 @@ public class UnicodeEscapeProcessingProvider implements Provider {
 	/** 
 	 * Retrieves the next un-escaped character from the buffered {@link #_input}.
 	 * 
-	 * @return The next character or <code>-1</code> if no more input is available.
+	 * @return The next character or {@code -1} if no more input is available.
 	 */
 	private int nextBufferedChar() throws IOException {
 		while (isBufferEmpty()) {

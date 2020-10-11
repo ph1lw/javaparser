@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -47,7 +47,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.Generated;
 
 /**
- * A definition of a class or interface.<br/><code>class X { ... }</code>
+ * A definition of a class or interface.<br>{@code class X { ... }}
  *
  * @author Julio Vilmar Gesser
  */

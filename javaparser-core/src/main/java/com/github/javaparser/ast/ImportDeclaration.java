@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -8,7 +8,7 @@
  * a) the GNU Lesser General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * b) the terms of the Apache License 
+ * b) the terms of the Apache License
  *
  * You should have received a copy of both licenses in LICENCE.LGPL and
  * LICENCE.APACHE. Please refer to those files for details.
@@ -36,11 +36,11 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * An import declaration.
- * <br/><code>import com.github.javaparser.JavaParser;</code>
- * <br/><code>import com.github.javaparser.*;</code>
- * <br/><code>import com.github.javaparser.JavaParser.*; </code>
- * <br/><code>import static com.github.javaparser.JavaParser.*;</code>
- * <br/><code>import static com.github.javaparser.JavaParser.parse;</code>
+ * <br>{@code import com.github.javaparser.JavaParser;}
+ * <br>{@code import com.github.javaparser.*;}
+ * <br>{@code import com.github.javaparser.JavaParser.*; }
+ * <br>{@code import static com.github.javaparser.JavaParser.*;}
+ * <br>{@code import static com.github.javaparser.JavaParser.parse;}
  *
  * <p>The name does not include the asterisk or the static keyword.</p>
  * @author Julio Vilmar Gesser

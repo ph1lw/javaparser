@@ -23,14 +23,17 @@ package com.github.javaparser;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.comments.CommentsCollection;
+import com.github.javaparser.utils.TestParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+
 import static com.github.javaparser.StaticJavaParser.parse;
 import static com.github.javaparser.StaticJavaParser.parseResource;
-import static com.github.javaparser.utils.TestUtils.assertEqualsNoEol;
-import static com.github.javaparser.utils.Utils.EOL;
+import static com.github.javaparser.utils.TestUtils.assertEqualToTextResource;
+import static com.github.javaparser.utils.TestUtils.assertEqualsStringIgnoringEol;
+import static com.github.javaparser.utils.Utils.SYSTEM_EOL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CommentsInserterTest {
@@ -38,9 +41,12 @@ class CommentsInserterTest {
         return "com/github/javaparser/issue_samples/" + sampleName + ".java.txt";
     }
 
+    private String makeExpectedFilename(String sampleName) {
+        return "/com/github/javaparser/issue_samples/" + sampleName + ".java.expected.txt";
+    }
+
     private ParseResult<CompilationUnit> parseSample(String sampleName) throws IOException {
-        Provider p = Providers.resourceProvider(
-                makeFilename(sampleName));
+        Provider p = Providers.resourceProvider(makeFilename(sampleName));
         return new JavaParser().parse(ParseStart.COMPILATION_UNIT, p);
     }
 
@@ -49,27 +55,27 @@ class CommentsInserterTest {
      */
     @Test
     void issue290() throws IOException {
-        ParseResult result = parseSample("Issue290");
-        CommentsCollection cc = (CommentsCollection) result.getCommentsCollection().get();
+        ParseResult<CompilationUnit> result = this.parseSample("Issue290");
+        CommentsCollection cc = result.getCommentsCollection().get();
         assertEquals(1, cc.getLineComments().size());
         assertEquals(1, cc.getJavadocComments().size());
     }
 
     @Test
     void issue624() throws IOException {
-        parseResource(makeFilename("Issue624"));
+        this.parseSample("Issue624");
         // Should not fail
     }
 
     @Test
     void issue200EnumConstantsWithCommentsForceVerticalAlignment() {
-        CompilationUnit cu = parse("public enum X {" + EOL +
-                "    /** const1 javadoc */" + EOL +
-                "    BORDER_CONSTANT," + EOL +
-                "    /** const2 javadoc */" + EOL +
-                "    ANOTHER_CONSTANT" + EOL +
+        CompilationUnit cu = TestParser.parseCompilationUnit("public enum X {" + SYSTEM_EOL +
+                "    /** const1 javadoc */" + SYSTEM_EOL +
+                "    BORDER_CONSTANT," + SYSTEM_EOL +
+                "    /** const2 javadoc */" + SYSTEM_EOL +
+                "    ANOTHER_CONSTANT" + SYSTEM_EOL +
                 "}");
-        assertEqualsNoEol("public enum X {\n" +
+        assertEqualsStringIgnoringEol("public enum X {\n" +
                 "\n" +
                 "    /**\n" +
                 "     * const1 javadoc\n" +
@@ -84,16 +90,16 @@ class CommentsInserterTest {
 
     @Test
     void issue234LosingCommentsInArrayInitializerExpr() {
-        CompilationUnit cu = parse("@Anno(stuff={" + EOL +
-                "    // Just," + EOL +
-                "    // an," + EOL +
-                "    // example" + EOL +
-                "})" + EOL +
-                "class ABC {" + EOL +
-                "" + EOL +
+        CompilationUnit cu = TestParser.parseCompilationUnit("@Anno(stuff={" + SYSTEM_EOL +
+                "    // Just," + SYSTEM_EOL +
+                "    // an," + SYSTEM_EOL +
+                "    // example" + SYSTEM_EOL +
+                "})" + SYSTEM_EOL +
+                "class ABC {" + SYSTEM_EOL +
+                "" + SYSTEM_EOL +
                 "}");
 
-        assertEqualsNoEol("@Anno(stuff = {// Just,\n" +
+        assertEqualsStringIgnoringEol("@Anno(stuff = {// Just,\n" +
                 "// an,\n" +
                 "// example\n" +
                 "})\n" +
@@ -101,4 +107,10 @@ class CommentsInserterTest {
                 "}\n", cu.toString());
     }
 
+
+    @Test
+    void issue412() throws IOException {
+        CompilationUnit cu = parseSample("Issue412").getResult().get();
+        assertEqualToTextResource(makeExpectedFilename("Issue412"), cu.toString());
+    }
 }

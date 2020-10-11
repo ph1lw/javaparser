@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -40,7 +40,7 @@ public @interface Generated {
     /**
      * The value element must have the name of the code generator.
      * The recommended convention is to use the fully qualified name of the
-     * code generator. For example: <code>com.acme.generator.CodeGen</code>.
+     * code generator. For example: {@code com.acme.generator.CodeGen}.
      */
     String[] value();
 }

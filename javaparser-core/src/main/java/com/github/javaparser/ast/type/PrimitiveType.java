@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -42,9 +42,9 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * A primitive type.
- * <br/><code>int</code>
- * <br/><code>boolean</code>
- * <br/><code>short</code>
+ * <br>{@code int}
+ * <br>{@code boolean}
+ * <br>{@code short}
  *
  * @author Julio Vilmar Gesser
  */

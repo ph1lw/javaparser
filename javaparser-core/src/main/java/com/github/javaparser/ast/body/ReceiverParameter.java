@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -43,7 +43,7 @@ import com.github.javaparser.ast.Generated;
 /**
  * The rather obscure <a href="http://blog.joda.org/2015/12/explicit-receiver-parameters.html">"receiver parameter" feature of Java</a>.
  *
- * <br/>All annotations preceding the type will be set on this object, not on the type.
+ * <br>All annotations preceding the type will be set on this object, not on the type.
  * JavaParser doesn't know if it they are applicable to the receiver parameter or the type.
  *
  * @author Julio Vilmar Gesser

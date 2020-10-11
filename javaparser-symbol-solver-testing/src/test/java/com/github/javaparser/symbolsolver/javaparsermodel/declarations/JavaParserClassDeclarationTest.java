@@ -25,10 +25,7 @@ import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
-import com.github.javaparser.resolution.declarations.ResolvedConstructorDeclaration;
-import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
-import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
-import com.github.javaparser.resolution.declarations.ResolvedMethodLikeDeclaration;
+import com.github.javaparser.resolution.declarations.*;
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.symbolsolver.AbstractSymbolResolutionTest;
@@ -48,13 +45,16 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.github.javaparser.StaticJavaParser.parse;
-import static com.github.javaparser.ast.Modifier.Keyword.PRIVATE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JavaParserClassDeclarationTest extends AbstractSymbolResolutionTest {
@@ -173,14 +173,14 @@ class JavaParserClassDeclarationTest extends AbstractSymbolResolutionTest {
     @Test
     void testGetSuperclassWithoutTypeParameters() {
         JavaParserClassDeclaration compilationUnit = (JavaParserClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals("com.github.javaparser.ast.Node", compilationUnit.getSuperClass().getQualifiedName());
+        assertEquals("com.github.javaparser.ast.Node", compilationUnit.getSuperClass().get().getQualifiedName());
     }
 
     @Test
     void testGetSuperclassWithTypeParameters() {
         JavaParserClassDeclaration compilationUnit = (JavaParserClassDeclaration) typeSolverNewCode.solveType("com.github.javaparser.ast.body.ConstructorDeclaration");
-        assertEquals("com.github.javaparser.ast.body.BodyDeclaration", compilationUnit.getSuperClass().getQualifiedName());
-        assertEquals("com.github.javaparser.ast.body.ConstructorDeclaration", compilationUnit.getSuperClass().typeParametersMap().getValueBySignature("com.github.javaparser.ast.body.BodyDeclaration.T").get().asReferenceType().getQualifiedName());
+        assertEquals("com.github.javaparser.ast.body.BodyDeclaration", compilationUnit.getSuperClass().get().getQualifiedName());
+        assertEquals("com.github.javaparser.ast.body.ConstructorDeclaration", compilationUnit.getSuperClass().get().typeParametersMap().getValueBySignature("com.github.javaparser.ast.body.BodyDeclaration.T").get().asReferenceType().getQualifiedName());
     }
 
     @Test
@@ -662,7 +662,8 @@ class JavaParserClassDeclarationTest extends AbstractSymbolResolutionTest {
 
         List<String> signatures = sortedMethods.stream().map(m -> m.getQualifiedSignature()).collect(Collectors.toList());
 
-        assertEquals(ImmutableList.of("com.github.javaparser.ast.Node.addOrphanComment(com.github.javaparser.ast.comments.Comment)",
+        List<String> expected = new ArrayList<>(Arrays.asList(
+                "com.github.javaparser.ast.Node.addOrphanComment(com.github.javaparser.ast.comments.Comment)",
                 "com.github.javaparser.ast.Node.clone()",
                 "com.github.javaparser.ast.Node.contains(com.github.javaparser.ast.Node)",
                 "com.github.javaparser.ast.Node.equals(java.lang.Object)",
@@ -762,7 +763,15 @@ class JavaParserClassDeclarationTest extends AbstractSymbolResolutionTest {
                 "java.lang.Object.registerNatives()",
                 "java.lang.Object.wait()",
                 "java.lang.Object.wait(long)",
-                "java.lang.Object.wait(long, int)"), signatures);
+                "java.lang.Object.wait(long, int)"
+        ));
+
+        // Temporary workaround to allow tests to pass on JDK14
+        if(TestJdk.getCurrentHostJdk().getMajorVersion() >= 14) {
+            expected.remove("java.lang.Object.registerNatives()");
+        }
+
+        assertThat(signatures, containsInAnyOrder(expected.toArray()));
     }
 
     ///
@@ -828,7 +837,7 @@ class JavaParserClassDeclarationTest extends AbstractSymbolResolutionTest {
 
         ResolvedReferenceType stringType = (ResolvedReferenceType) ReflectionFactory.typeUsageFor(String.class, typeSolverNewCode);
         ResolvedReferenceType rawClassType = (ResolvedReferenceType) ReflectionFactory.typeUsageFor(Class.class, typeSolverNewCode);
-        ResolvedReferenceType classOfStringType = (ResolvedReferenceType) rawClassType.replaceTypeVariables(rawClassType.getTypeDeclaration().getTypeParameters().get(0), stringType);
+        ResolvedReferenceType classOfStringType = (ResolvedReferenceType) rawClassType.replaceTypeVariables(rawClassType.getTypeDeclaration().get().getTypeParameters().get(0), stringType);
         res = constructorDeclaration.solveMethod("isThrows", ImmutableList.of(classOfStringType));
         assertFalse(res.isSolved());
     }
@@ -905,4 +914,37 @@ class JavaParserClassDeclarationTest extends AbstractSymbolResolutionTest {
     // Set<TypeDeclaration> internalTypes()
 
     // Optional<TypeDeclaration> containerType()
+
+
+    @Test
+    void testCanBeAssignedTo() {
+        JavaParserClassDeclaration compilationUnit = (JavaParserClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
+        ResolvedReferenceTypeDeclaration stringTypeDeclaration = typeSolver.solveType("java.lang.String");
+        ResolvedReferenceTypeDeclaration objectTypeDeclaration = typeSolver.solveType("java.lang.Object");
+        ResolvedReferenceTypeDeclaration cloneableTypeDeclaration = typeSolver.solveType("java.lang.Cloneable");
+        ResolvedReferenceTypeDeclaration serializableTypeDeclaration = typeSolver.solveType("java.io.Serializable");
+
+        // Assign "UP" (implicit) -- Assign to implicitly state ancestor (java.lang.Object) -- should be permitted
+        assertTrue(compilationUnit.canBeAssignedTo(objectTypeDeclaration),"CompilationUnit should be reported as assignable to Object");
+
+        // Assign "UP" (explicit) -- Assign to explicitly stated ancestors (extends/implements) -- should be permitted
+        assertTrue(compilationUnit.canBeAssignedTo(cloneableTypeDeclaration),"CompilationUnit should be reported as assignable to Cloneable, because it extends Node which implements Cloneable");
+
+        // Assign "SELF" -- Assign to self -- should be permitted
+        assertTrue(compilationUnit.canBeAssignedTo(compilationUnit),"CompilationUnit should not be reported as assignable to CompilationUnit");
+        assertTrue(stringTypeDeclaration.canBeAssignedTo(stringTypeDeclaration),"String should not be reported as assignable to String");
+        assertTrue(objectTypeDeclaration.canBeAssignedTo(objectTypeDeclaration),"Object should be reported as assignable to Object");
+
+
+        // Assign "DOWN" -- Assign ancestor to descendent -- should be rejected
+        assertFalse(cloneableTypeDeclaration.canBeAssignedTo(compilationUnit),"CloneableTypeDeclaration should not be reported as assignable to CompilationUnit");
+        assertFalse(objectTypeDeclaration.canBeAssignedTo(compilationUnit),"Object should not be reported as assignable to CompilationUnit");
+
+        // Assign "independent" -- Assign to a class with a completely separate/independent hierarchy tree (up to Object, down to other) -- should be rejected
+        assertFalse(compilationUnit.canBeAssignedTo(stringTypeDeclaration),"CompilationUnit should not be reported as assignable to String");
+
+        // Assign "independent" -- Assign to a interface with a completely separate/independent hierarchy tree (up to Object, down to other) -- should be rejected
+        assertFalse(compilationUnit.canBeAssignedTo(serializableTypeDeclaration), "CompilationUnit should not be reported as assignable to Serializable");
+    }
+
 }

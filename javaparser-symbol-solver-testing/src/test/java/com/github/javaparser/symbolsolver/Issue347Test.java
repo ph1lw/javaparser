@@ -57,10 +57,10 @@ class Issue347Test extends AbstractResolutionTest{
                 "    Foo myFooField;\n" +
                 "}";
         CompilationUnit cu = parse(code);
-        FieldDeclaration fieldDeclaration = Navigator.findNodeOfGivenClass(cu, FieldDeclaration.class);
+        FieldDeclaration fieldDeclaration = Navigator.demandNodeOfGivenClass(cu, FieldDeclaration.class);
         ResolvedType fieldType = javaParserFacade.getType(fieldDeclaration);
         assertTrue(fieldType.isReferenceType());
-        assertTrue(fieldType.asReferenceType().getTypeDeclaration().isEnum());
+        assertTrue(fieldType.asReferenceType().getTypeDeclaration().get().isEnum());
         assertEquals("foo.bar.Foo", fieldType.asReferenceType().getQualifiedName());
     }
 }

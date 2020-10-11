@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -95,7 +95,7 @@ public abstract class Type extends Node implements Resolvable<ResolvedType> {
     /**
      * Finds the element type, meaning: the type without ArrayTypes around it.
      * <p>
-     * In "<code>int[] a[];</code>", the element type is int.
+     * In "{@code int[] a[];}", the element type is int.
      */
     public Type getElementType() {
         if (this instanceof ArrayType) {

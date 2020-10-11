@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -18,7 +18,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  */
-
 package com.github.javaparser.ast.modules;
 
 import com.github.javaparser.ast.AllFieldsConstructor;
@@ -39,7 +38,7 @@ import com.github.javaparser.metamodel.JavaParserMetaModel;
 import com.github.javaparser.ast.Generated;
 
 /**
- * An opens directive in module-info.java. <code>opens R.S to T1.U1, T2.U2;</code>
+ * An opens directive in module-info.java. {@code opens R.S to T1.U1, T2.U2;}
  */
 public class ModuleOpensDirective extends ModuleDirective implements NodeWithName<ModuleOpensDirective> {
 

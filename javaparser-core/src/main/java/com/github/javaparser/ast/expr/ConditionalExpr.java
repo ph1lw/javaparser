@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -37,7 +37,7 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * The ternary conditional expression.
- * In <code>b==0?x:y</code>, b==0 is the condition, x is thenExpr, and y is elseExpr.
+ * In {@code b==0?x:y}, b==0 is the condition, x is thenExpr, and y is elseExpr.
  *
  * @author Julio Vilmar Gesser
  */

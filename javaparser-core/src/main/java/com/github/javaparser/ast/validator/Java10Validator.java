@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -26,6 +26,8 @@ import com.github.javaparser.ast.validator.chunks.VarValidator;
 
 /**
  * This validator validates according to Java 10 syntax rules.
+ *
+ * @see <a href="https://openjdk.java.net/projects/jdk/10/">https://openjdk.java.net/projects/jdk/10/</a>
  */
 public class Java10Validator extends Java9Validator {
 

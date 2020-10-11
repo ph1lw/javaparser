@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -34,9 +34,9 @@ import static com.github.javaparser.utils.Utils.screamingToCamelCase;
  * Typically they are found at the end of Javadoc comments.
  * <p>
  * Examples:
- * <code>@see AnotherClass</code>
- * <code>@since v0.0.1</code>
- * <code>@author Jim O'Java</code>
+ * {@code @see AnotherClass}
+ * {@code @since v0.0.1}
+ * {@code @author Jim O'Java}
  */
 public class JavadocBlockTag {
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -39,7 +39,7 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * This class is just instantiated as scopes for MethodReferenceExpr nodes to encapsulate Types.
- * <br/>In <code>World::greet</code> the ClassOrInterfaceType "World" is wrapped in a TypeExpr
+ * <br>In {@code World::greet} the ClassOrInterfaceType "World" is wrapped in a TypeExpr
  * before it is set as the scope of the MethodReferenceExpr.
  *
  * @author Raquel Pau

@@ -32,8 +32,8 @@ import org.junit.jupiter.api.Test;
 
 import static com.github.javaparser.StaticJavaParser.parse;
 import static com.github.javaparser.utils.TestParser.*;
-import static com.github.javaparser.utils.TestUtils.assertEqualsNoEol;
-import static com.github.javaparser.utils.Utils.EOL;
+import static com.github.javaparser.utils.TestUtils.assertEqualsStringIgnoringEol;
+import static com.github.javaparser.utils.Utils.SYSTEM_EOL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PrettyPrintVisitorTest {
@@ -63,10 +63,91 @@ class PrettyPrintVisitorTest {
         return new PrettyPrinter().print(node);
     }
 
+    private String print(Node node, PrettyPrinterConfiguration conf) {
+        return new PrettyPrinter(conf).print(node);
+    }
+
+
     @Test
     void printSimpleClassExpr() {
         ClassExpr expr = parseExpression("Foo.class");
         assertEquals("Foo.class", print(expr));
+    }
+
+
+    /**
+     * Here is a simple test according to R0 (removing spaces)
+     */
+    @Test
+    void printOperatorsR0(){
+        PrettyPrinterConfiguration conf1 = new PrettyPrinterConfiguration().setSpaceAroundOperators(false);
+        Statement statement1 = parseStatement("a = 1 + 1;");
+        assertEquals("a=1+1;", print(statement1, conf1));
+    }
+
+    /**
+     * Here we test different operators according to requirement R1 (handling different operators)
+     */
+    @Test
+    void printOperatorsR1(){
+
+        Statement statement1 = parseStatement("a = 1 + 1;");
+        assertEquals("a = 1 + 1;", print(statement1));
+
+        Statement statement2 = parseStatement("a = 1 - 1;");
+        assertEquals("a = 1 - 1;", print(statement2));
+
+        Statement statement3 = parseStatement("a = 1 * 1;");
+        assertEquals("a = 1 * 1;", print(statement3));
+
+        Statement statement4 = parseStatement("a = 1 % 1;");
+        assertEquals("a = 1 % 1;", print(statement4));
+
+        Statement statement5 = parseStatement("a=1/1;");
+        assertEquals("a = 1 / 1;", print(statement5));
+
+        Statement statement6 = parseStatement("if (1 > 2 && 1 < 3 || 1 < 3){}");
+        assertEquals("if (1 > 2 && 1 < 3 || 1 < 3) {" + SYSTEM_EOL
+                + "}", print(statement6));
+
+    }
+
+    /**
+     * Here is a simple test according to R2 (that it should be optional/modifiable)
+     */
+    @Test
+    void printOperatorsR2(){
+        PrettyPrinterConfiguration conf1 = new PrettyPrinterConfiguration().setSpaceAroundOperators(false);
+        Statement statement1 = parseStatement("a = 1 + 1;");
+        assertEquals("a=1+1;", print(statement1, conf1));
+
+        PrettyPrinterConfiguration conf2 = new PrettyPrinterConfiguration().setSpaceAroundOperators(false);
+        Statement statement2 = parseStatement("a=1+1;");
+        assertEquals("a=1+1;", print(statement2, conf2));
+
+        PrettyPrinterConfiguration conf3 = new PrettyPrinterConfiguration().setSpaceAroundOperators(true);
+        Statement statement3 = parseStatement("a = 1 + 1;");
+        assertEquals("a = 1 + 1;", print(statement3, conf3));
+
+        PrettyPrinterConfiguration conf4 = new PrettyPrinterConfiguration().setSpaceAroundOperators(true);
+        Statement statement4 = parseStatement("a=1+1;");
+        assertEquals("a = 1 + 1;", print(statement4, conf4));
+
+    }
+
+    @Test
+    void printOperatorA(){
+        PrettyPrinterConfiguration conf = new PrettyPrinterConfiguration().setSpaceAroundOperators(false);
+        Statement statement6 = parseStatement("if(1>2&&1<3||1<3){}");
+        assertEquals("if (1>2&&1<3||1<3) {" + SYSTEM_EOL
+                + "}", print(statement6, conf));
+    }
+
+    @Test
+    void printOperator2(){
+        Expression expression = parseExpression("1+1");
+        PrettyPrinterConfiguration spaces = new PrettyPrinterConfiguration().setSpaceAroundOperators(false);
+        assertEquals("1+1", print(expression, spaces));
     }
 
     @Test
@@ -84,37 +165,37 @@ class PrettyPrintVisitorTest {
     @Test
     void printSimplestClass() {
         Node node = parse("class A {}");
-        assertEquals("class A {" + EOL +
-                "}" + EOL, print(node));
+        assertEquals("class A {" + SYSTEM_EOL +
+                "}" + SYSTEM_EOL, print(node));
     }
 
     @Test
     void printAClassWithField() {
         Node node = parse("class A { int a; }");
-        assertEquals("class A {" + EOL
-                + EOL +
-                "    int a;" + EOL +
-                "}" + EOL, print(node));
+        assertEquals("class A {" + SYSTEM_EOL
+                + SYSTEM_EOL +
+                "    int a;" + SYSTEM_EOL +
+                "}" + SYSTEM_EOL, print(node));
     }
 
     @Test
     void printAReceiverParameter() {
         Node node = parseBodyDeclaration("int x(@O X A.B.this, int y) { }");
-        assertEquals("int x(@O X A.B.this, int y) {" + EOL + "}", print(node));
+        assertEquals("int x(@O X A.B.this, int y) {" + SYSTEM_EOL + "}", print(node));
     }
 
     @Test
     void printLambdaIntersectionTypeAssignment() {
-        String code = "class A {" + EOL +
-                "  void f() {" + EOL +
-                "    Runnable r = (Runnable & Serializable) (() -> {});" + EOL +
-                "    r = (Runnable & Serializable)() -> {};" + EOL +
-                "    r = (Runnable & I)() -> {};" + EOL +
+        String code = "class A {" + SYSTEM_EOL +
+                "  void f() {" + SYSTEM_EOL +
+                "    Runnable r = (Runnable & Serializable) (() -> {});" + SYSTEM_EOL +
+                "    r = (Runnable & Serializable)() -> {};" + SYSTEM_EOL +
+                "    r = (Runnable & I)() -> {};" + SYSTEM_EOL +
                 "  }}";
         CompilationUnit cu = parse(code);
         MethodDeclaration methodDeclaration = (MethodDeclaration) cu.getType(0).getMember(0);
 
-        assertEquals("Runnable r = (Runnable & Serializable) (() -> {" + EOL + "});", print(methodDeclaration.getBody().get().getStatements().get(0)));
+        assertEquals("Runnable r = (Runnable & Serializable) (() -> {" + SYSTEM_EOL + "});", print(methodDeclaration.getBody().get().getStatements().get(0)));
     }
 
     @Test
@@ -128,9 +209,9 @@ class PrettyPrintVisitorTest {
 
     @Test
     void printLambdaIntersectionTypeReturn() {
-        String code = "class A {" + EOL
-                + "  Object f() {" + EOL
-                + "    return (Comparator<Map.Entry<K, V>> & Serializable)(c1, c2) -> c1.getKey().compareTo(c2.getKey()); " + EOL
+        String code = "class A {" + SYSTEM_EOL
+                + "  Object f() {" + SYSTEM_EOL
+                + "    return (Comparator<Map.Entry<K, V>> & Serializable)(c1, c2) -> c1.getKey().compareTo(c2.getKey()); " + SYSTEM_EOL
                 + "}}";
         CompilationUnit cu = parse(code);
         MethodDeclaration methodDeclaration = (MethodDeclaration) cu.getType(0).getMember(0);
@@ -140,11 +221,11 @@ class PrettyPrintVisitorTest {
 
     @Test
     void printClassWithoutJavaDocButWithComment() {
-        String code = String.format("/** javadoc */ public class A { %s// stuff%s}", EOL, EOL);
+        String code = String.format("/** javadoc */ public class A { %s// stuff%s}", SYSTEM_EOL, SYSTEM_EOL);
         CompilationUnit cu = parse(code);
         PrettyPrinterConfiguration ignoreJavaDoc = new PrettyPrinterConfiguration().setPrintJavadoc(false);
         String content = cu.toString(ignoreJavaDoc);
-        assertEquals(String.format("public class A {%s    // stuff%s}%s", EOL, EOL, EOL), content);
+        assertEquals(String.format("public class A {%s    // stuff%s}%s", SYSTEM_EOL, SYSTEM_EOL, SYSTEM_EOL), content);
     }
 
     @Test
@@ -152,7 +233,7 @@ class PrettyPrintVisitorTest {
         String code = "import x.y.z;import a.b.c;import static b.c.d;class c {}";
         CompilationUnit cu = parse(code);
         String content = cu.toString();
-        assertEqualsNoEol("import x.y.z;\n" +
+        assertEqualsStringIgnoringEol("import x.y.z;\n" +
                 "import a.b.c;\n" +
                 "import static b.c.d;\n" +
                 "\n" +
@@ -166,7 +247,7 @@ class PrettyPrintVisitorTest {
         CompilationUnit cu = parse(code);
         PrettyPrinterConfiguration orderImports = new PrettyPrinterConfiguration().setOrderImports(true);
         String content = cu.toString(orderImports);
-        assertEqualsNoEol("import static b.c.d;\n" +
+        assertEqualsStringIgnoringEol("import static b.c.d;\n" +
                 "import a.b.c;\n" +
                 "import x.y.z;\n" +
                 "\n" +
@@ -179,7 +260,7 @@ class PrettyPrintVisitorTest {
         CompilationUnit cu = new CompilationUnit();
         cu.addClass("X").addMethod("abc").setJavadocComment("line1\n   line2 *\n * line3");
 
-        assertEqualsNoEol("public class X {\n" +
+        assertEqualsStringIgnoringEol("public class X {\n" +
                 "\n" +
                 "    /**\n" +
                 "     * line1\n" +
@@ -196,7 +277,7 @@ class PrettyPrintVisitorTest {
         CompilationUnit cu = new CompilationUnit();
         cu.addClass("X").addMethod("abc").setJavadocComment("");
 
-        assertEqualsNoEol("public class X {\n" +
+        assertEqualsStringIgnoringEol("public class X {\n" +
                 "\n" +
                 "    /**\n" +
                 "     */\n" +
@@ -210,7 +291,7 @@ class PrettyPrintVisitorTest {
         CompilationUnit cu = new CompilationUnit();
         cu.addClass("X").addMethod("abc").setJavadocComment("\n\n\n ab\n\n\n cd\n\n\n");
 
-        assertEqualsNoEol("public class X {\n" +
+        assertEqualsStringIgnoringEol("public class X {\n" +
                 "\n" +
                 "    /**\n" +
                 "     * ab\n" +
@@ -227,7 +308,7 @@ class PrettyPrintVisitorTest {
         CompilationUnit cu = new CompilationUnit();
         cu.addClass("X").addMethod("abc").setJavadocComment("line1");
 
-        assertEqualsNoEol("public class X {\n" +
+        assertEqualsStringIgnoringEol("public class X {\n" +
                 "\n" +
                 "    /**\n" +
                 "     * line1\n" +
@@ -242,7 +323,7 @@ class PrettyPrintVisitorTest {
         CompilationUnit cu = new CompilationUnit();
         cu.addClass("X").addMethod("abc").setJavadocComment("line1\nline2");
 
-        assertEqualsNoEol("public class X {\n" +
+        assertEqualsStringIgnoringEol("public class X {\n" +
                 "\n" +
                 "    /**\n" +
                 "     * line1\n" +
@@ -260,7 +341,7 @@ class PrettyPrintVisitorTest {
                 "line2\n" +
                 "    3");
 
-        assertEqualsNoEol("public class X {\n" +
+        assertEqualsStringIgnoringEol("public class X {\n" +
                 "\n" +
                 "    /**\n" +
                 "     * line1\n" +
@@ -277,7 +358,7 @@ class PrettyPrintVisitorTest {
         CompilationUnit cu = new CompilationUnit();
         cu.addClass("X").addMethod("abc").setComment(new LineComment("   line1  \n "));
 
-        assertEqualsNoEol("public class X {\n" +
+        assertEqualsStringIgnoringEol("public class X {\n" +
                 "\n" +
                 "    // line1\n" +
                 "    void abc() {\n" +
@@ -297,7 +378,7 @@ class PrettyPrintVisitorTest {
                 "    }\n" +
                 "}\n");
 
-        assertEqualsNoEol("class A {\n" +
+        assertEqualsStringIgnoringEol("class A {\n" +
                 "\n" +
                 "    public void helloWorld(String greeting, String name) {\n" +
                 "    // sdfsdfsdf\n" +
@@ -335,7 +416,7 @@ class PrettyPrintVisitorTest {
                 "public void add(int x, int y){}}";
 
         CompilationUnit cu_allLeadingSpaces = parse(input_allLeadingSpaces);
-        assertEqualsNoEol(expected, cu_allLeadingSpaces.toString());
+        assertEqualsStringIgnoringEol(expected, cu_allLeadingSpaces.toString());
     }
 
     @Test
@@ -351,7 +432,7 @@ class PrettyPrintVisitorTest {
                 "public void add(int x, int y){}}";
 
         CompilationUnit cu_singleMissingLeadingSpace = parse(input_singleMissingLeadingSpace);
-        assertEqualsNoEol(expected, cu_singleMissingLeadingSpace.toString());
+        assertEqualsStringIgnoringEol(expected, cu_singleMissingLeadingSpace.toString());
     }
 
     @Test
@@ -367,13 +448,13 @@ class PrettyPrintVisitorTest {
                 "public void add(int x, int y){}}";
 
         CompilationUnit cu_leadingTab = parseCompilationUnit(input_leadingTab);
-        assertEqualsNoEol(expected, cu_leadingTab.toString());
+        assertEqualsStringIgnoringEol(expected, cu_leadingTab.toString());
     }
 
     @Test
     void printYield() {
         Statement statement = parseStatement("yield 5*5;");
-        assertEqualsNoEol("yield 5 * 5;", statement.toString());
+        assertEqualsStringIgnoringEol("yield 5 * 5;", statement.toString());
     }
 
     @Test
@@ -386,7 +467,7 @@ class PrettyPrintVisitorTest {
                 "              </html>\n" +
                 "              \"\"\";}");
 
-        assertEqualsNoEol("String html = \"\"\"\n" +
+        assertEqualsStringIgnoringEol("String html = \"\"\"\n" +
                 "    <html>\n" +
                 "        <body>\n" +
                 "            <p>Hello, world</p>\n" +
@@ -401,7 +482,7 @@ class PrettyPrintVisitorTest {
                 "              <html>\n" +
                 "              </html>\"\"\";}");
 
-        assertEqualsNoEol("String html = \"\"\"\n" +
+        assertEqualsStringIgnoringEol("String html = \"\"\"\n" +
                 "    <html>\n" +
                 "    </html>\"\"\";", cu.getClassByName("X").get().getFieldByName("html").get().toString());
     }

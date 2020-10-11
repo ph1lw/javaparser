@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -36,11 +36,11 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * A literal character.
- * <br/><code>'a'</code>
- * <br/><code>'\t'</code>
- * <br/><code>'Ω'</code>
- * <br/><code>'\177'</code>
- * <br/><code>'💩'</code>
+ * <br>{@code 'a'}
+ * <br>{@code '\t'}
+ * <br>{@code 'Ω'}
+ * <br>{@code '\177'}
+ * <br>{@code '💩'}
  *
  * @author Julio Vilmar Gesser
  */

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -35,7 +35,7 @@ import com.github.javaparser.ast.Generated;
 import static com.github.javaparser.StaticJavaParser.parseJavadoc;
 
 /**
- * A Javadoc comment. <code>/&#42;&#42; a comment &#42;/</code>
+ * A Javadoc comment. {@code /&#42;&#42; a comment &#42;/}
  *
  * @author Julio Vilmar Gesser
  */

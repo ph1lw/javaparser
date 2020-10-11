@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -41,7 +41,7 @@ import java.util.Optional;
 import com.github.javaparser.ast.Generated;
 
 /**
- * An annotation type declaration.<br/><code>@interface X { ... }</code>
+ * An annotation type declaration.<br>{@code @interface X { ... }}
  *
  * @author Julio Vilmar Gesser
  */

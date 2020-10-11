@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015-2016 Federico Tomassetti
- * Copyright (C) 2017-2019 The JavaParser Team.
+ * Copyright (C) 2017-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -56,7 +56,7 @@ public class TypeInference {
             throw new NullPointerException();
         }
         this.typeSolver = typeSolver;
-        this.object = new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver);
+        this.object = new ReferenceTypeImpl(typeSolver.getSolvedJavaLangObject(), typeSolver);
     }
 
     ///

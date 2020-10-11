@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -18,7 +18,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  */
-
 package com.github.javaparser.ast.stmt;
 
 import com.github.javaparser.TokenRange;
@@ -44,8 +43,8 @@ import static com.github.javaparser.utils.Utils.assertNotNull;
  * Does not exist.
  * <h2>Java 12</h2>
  * Yields an expression to be used in the switch-expression:
- * <br/><code>yield 123+456;</code>
- * <br/><code>yield "more or less";</code>
+ * <br>{@code yield 123+456;}
+ * <br>{@code yield "more or less";}
  */
 public class YieldStmt extends Statement implements NodeWithExpression {
 

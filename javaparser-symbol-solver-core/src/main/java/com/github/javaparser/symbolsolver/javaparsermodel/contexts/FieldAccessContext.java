@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015-2016 Federico Tomassetti
- * Copyright (C) 2017-2019 The JavaParser Team.
+ * Copyright (C) 2017-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -24,7 +24,13 @@ package com.github.javaparser.symbolsolver.javaparsermodel.contexts;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
-import com.github.javaparser.resolution.declarations.*;
+import com.github.javaparser.resolution.declarations.ResolvedEnumConstantDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedEnumDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
@@ -38,7 +44,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static com.github.javaparser.symbolsolver.javaparser.Navigator.requireParentNode;
+import static com.github.javaparser.symbolsolver.javaparser.Navigator.demandParentNode;
 
 /**
  * @author Federico Tomassetti
@@ -56,20 +62,25 @@ public class FieldAccessContext extends AbstractJavaParserContext<FieldAccessExp
         if (wrappedNode.getName().toString().equals(name)) {
             if (wrappedNode.getScope() instanceof ThisExpr) {
                 ResolvedType typeOfThis = JavaParserFacade.get(typeSolver).getTypeOfThisIn(wrappedNode);
-                return new SymbolSolver(typeSolver).solveSymbolInType(typeOfThis.asReferenceType().getTypeDeclaration(), name);
+                if(typeOfThis.asReferenceType().getTypeDeclaration().isPresent()) {
+                    return new SymbolSolver(typeSolver).solveSymbolInType(
+                            typeOfThis.asReferenceType().getTypeDeclaration().get(),
+                            name
+                    );
+                }
             }
         }
-        return JavaParserFactory.getContext(requireParentNode(wrappedNode), typeSolver).solveSymbol(name);
+        return JavaParserFactory.getContext(demandParentNode(wrappedNode), typeSolver).solveSymbol(name);
     }
 
     @Override
     public SymbolReference<ResolvedTypeDeclaration> solveType(String name) {
-        return JavaParserFactory.getContext(requireParentNode(wrappedNode), typeSolver).solveType(name);
+        return JavaParserFactory.getContext(demandParentNode(wrappedNode), typeSolver).solveType(name);
     }
 
     @Override
     public SymbolReference<ResolvedMethodDeclaration> solveMethod(String name, List<ResolvedType> parameterTypes, boolean staticOnly) {
-        return JavaParserFactory.getContext(requireParentNode(wrappedNode), typeSolver).solveMethod(name, parameterTypes, false);
+        return JavaParserFactory.getContext(demandParentNode(wrappedNode), typeSolver).solveMethod(name, parameterTypes, false);
     }
 
     @Override
@@ -81,10 +92,14 @@ public class FieldAccessContext extends AbstractJavaParserContext<FieldAccessExp
                 return Optional.of(new Value(ResolvedPrimitiveType.INT, ARRAY_LENGTH_FIELD_NAME));
             }
             if (typeOfScope.isReferenceType()) {
-                if (typeOfScope.asReferenceType().getTypeDeclaration().isEnum()) {
-                    ResolvedEnumDeclaration enumDeclaration = (ResolvedEnumDeclaration)typeOfScope.asReferenceType().getTypeDeclaration();
-                    if (enumDeclaration.hasEnumConstant(name)) {
-                        return Optional.of(new Value(enumDeclaration.getEnumConstant(name).getType(), name));
+                Optional<ResolvedReferenceTypeDeclaration> optionalTypeDeclaration = typeOfScope.asReferenceType().getTypeDeclaration();
+                if(optionalTypeDeclaration.isPresent()) {
+                    ResolvedReferenceTypeDeclaration typeDeclaration = optionalTypeDeclaration.get();
+                    if (typeDeclaration.isEnum()) {
+                        ResolvedEnumDeclaration enumDeclaration = (ResolvedEnumDeclaration) typeDeclaration;
+                        if (enumDeclaration.hasEnumConstant(name)) {
+                            return Optional.of(new Value(enumDeclaration.getEnumConstant(name).getType(), name));
+                        }
                     }
                 }
                 Optional<ResolvedType> typeUsage = typeOfScope.asReferenceType().getFieldType(name);
@@ -93,7 +108,9 @@ public class FieldAccessContext extends AbstractJavaParserContext<FieldAccessExp
                 return Optional.empty();
             }
         } else {
-            return getParent().solveSymbolAsValue(name);
+            return getParent()
+                    .orElseThrow(() -> new RuntimeException("Parent context unexpectedly empty."))
+                    .solveSymbolAsValue(name);
         }
     }
 

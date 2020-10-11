@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -38,10 +38,8 @@ import com.github.javaparser.metamodel.NonEmptyProperty;
 import com.github.javaparser.metamodel.OptionalProperty;
 import com.github.javaparser.resolution.Resolvable;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
-
 import java.util.Optional;
 import java.util.function.Consumer;
-
 import static com.github.javaparser.utils.Utils.assertNonEmpty;
 import static com.github.javaparser.utils.Utils.assertNotNull;
 
@@ -49,9 +47,9 @@ import static com.github.javaparser.utils.Utils.assertNotNull;
  * Method reference expressions introduced in Java 8 specifically designed to simplify lambda Expressions.
  * Note that the field "identifier", indicating the word to the right of the ::, is not always a method name,
  * it can be "new".
- * <br/>In <code>System.out::println;</code> the scope is System.out and the identifier is "println"
- * <br/><code>(test ? stream.map(String::trim) : stream)::toArray;</code>
- * <br/>In <code>Bar&lt;String>::&lt;Integer>new</code> the String type argument is on the scope,
+ * <br>In {@code System.out::println;} the scope is System.out and the identifier is "println"
+ * <br>{@code (test ? stream.map(String::trim) : stream)::toArray;}
+ * <br>In {@code Bar<String>::<Integer>new} the String type argument is on the scope,
  * and the Integer type argument is on this MethodReferenceExpr.
  *
  * @author Raquel Pau

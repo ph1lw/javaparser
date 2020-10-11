@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -22,21 +22,34 @@
 package com.github.javaparser.printer.lexicalpreservation;
 
 import com.github.javaparser.GeneratedJavaParserConstants;
-import com.github.javaparser.JavaToken.Kind;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.CharLiteralExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.TextBlockLiteralExpr;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.printer.ConcreteSyntaxModel;
 import com.github.javaparser.printer.Printable;
 import com.github.javaparser.printer.SourcePrinter;
 import com.github.javaparser.printer.concretesyntaxmodel.*;
-import com.github.javaparser.printer.lexicalpreservation.changes.*;
-import com.github.javaparser.utils.Utils;
+import com.github.javaparser.printer.lexicalpreservation.changes.Change;
+import com.github.javaparser.printer.lexicalpreservation.changes.ListAdditionChange;
+import com.github.javaparser.printer.lexicalpreservation.changes.ListRemovalChange;
+import com.github.javaparser.printer.lexicalpreservation.changes.ListReplacementChange;
+import com.github.javaparser.printer.lexicalpreservation.changes.NoChange;
+import com.github.javaparser.printer.lexicalpreservation.changes.PropertyChange;
+import com.github.javaparser.utils.LineSeparator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
+import static com.github.javaparser.TokenTypes.eolTokenKind;
 
 class LexicalDifferenceCalculator {
 
@@ -108,7 +121,7 @@ class LexicalDifferenceCalculator {
         }
     }
 
-    List<DifferenceElement> calculateListRemovalDifference(ObservableProperty observableProperty, NodeList nodeList, int index) {
+    List<DifferenceElement> calculateListRemovalDifference(ObservableProperty observableProperty, NodeList<?> nodeList, int index) {
         Node container = nodeList.getParentNodeForChildren();
         CsmElement element = ConcreteSyntaxModel.forClass(container.getClass());
         CalculatedSyntaxModel original = calculatedSyntaxModelForNode(element, container);
@@ -116,15 +129,35 @@ class LexicalDifferenceCalculator {
         return DifferenceElementCalculator.calculate(original, after);
     }
 
-    List<DifferenceElement> calculateListAdditionDifference(ObservableProperty observableProperty, NodeList nodeList, int index, Node nodeAdded) {
+    List<DifferenceElement> calculateListAdditionDifference(ObservableProperty observableProperty, NodeList<?> nodeList, int index, Node nodeAdded) {
         Node container = nodeList.getParentNodeForChildren();
         CsmElement element = ConcreteSyntaxModel.forClass(container.getClass());
         CalculatedSyntaxModel original = calculatedSyntaxModelForNode(element, container);
         CalculatedSyntaxModel after = calculatedSyntaxModelAfterListAddition(element, observableProperty, nodeList, index, nodeAdded);
-        return DifferenceElementCalculator.calculate(original, after);
+
+        List<DifferenceElement> differenceElements = DifferenceElementCalculator.calculate(original, after);
+
+        // Set the line separator character tokens
+        LineSeparator lineSeparator = container.getLineEndingStyleOrDefault(LineSeparator.SYSTEM);
+        replaceEolTokens(differenceElements, lineSeparator);
+
+        return differenceElements;
     }
 
-    List<DifferenceElement> calculateListReplacementDifference(ObservableProperty observableProperty, NodeList nodeList, int index, Node newValue) {
+    private void replaceEolTokens(List<DifferenceElement> differenceElements, LineSeparator lineSeparator) {
+        for (int i = 0; i < differenceElements.size(); i++) {
+            DifferenceElement differenceElement = differenceElements.get(i);
+            if (differenceElement.isAdded()) {
+                CsmElement element = differenceElement.getElement();
+                boolean isWhitespaceToken = element instanceof CsmToken && ((CsmToken) element).isNewLine();
+                if (isWhitespaceToken) {
+                    differenceElements.set(i, new Added(CsmElement.newline(lineSeparator)));
+                }
+            }
+        }
+    }
+
+    List<DifferenceElement> calculateListReplacementDifference(ObservableProperty observableProperty, NodeList<?> nodeList, int index, Node newValue) {
         Node container = nodeList.getParentNodeForChildren();
         CsmElement element = ConcreteSyntaxModel.forClass(container.getClass());
         CalculatedSyntaxModel original = calculatedSyntaxModelForNode(element, container);
@@ -180,8 +213,9 @@ class LexicalDifferenceCalculator {
                 // So if we don't care that the node is an ExpressionStmt we could try to generate a wrong definition
                 // like this [class // This is my class, with my comment A {}]
                 if (node.getComment().isPresent() && node instanceof ExpressionStmt) {
+                    LineSeparator lineSeparator = node.getLineEndingStyleOrDefault(LineSeparator.SYSTEM);
                     elements.add(new CsmChild(node.getComment().get()));
-                    elements.add(new CsmToken(Kind.EOF.getKind(), Utils.EOL));
+                    elements.add(new CsmToken(eolTokenKind(lineSeparator), lineSeparator.asRawString()));
                 }
                 elements.add(new CsmChild(child));
             }
@@ -195,22 +229,22 @@ class LexicalDifferenceCalculator {
             CsmList csmList = (CsmList) csm;
             if (csmList.getProperty().isAboutNodes()) {
                 Object rawValue = change.getValue(csmList.getProperty(), node);
-                NodeList nodeList;
+                NodeList<?> nodeList;
                 if (rawValue instanceof Optional) {
-                    Optional optional = (Optional)rawValue;
+                    Optional<?> optional = (Optional<?>)rawValue;
                     if (optional.isPresent()) {
                         if (!(optional.get() instanceof NodeList)) {
                             throw new IllegalStateException("Expected NodeList, found " + optional.get().getClass().getCanonicalName());
                         }
-                        nodeList = (NodeList) optional.get();
+                        nodeList = (NodeList<?>) optional.get();
                     } else {
-                        nodeList = new NodeList();
+                        nodeList = new NodeList<>();
                     }
                 } else {
                     if (!(rawValue instanceof NodeList)) {
                         throw new IllegalStateException("Expected NodeList, found " + rawValue.getClass().getCanonicalName());
                     }
-                    nodeList = (NodeList) rawValue;
+                    nodeList = (NodeList<?>) rawValue;
                 }
                 if (!nodeList.isEmpty()) {
                     calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
@@ -227,12 +261,12 @@ class LexicalDifferenceCalculator {
                     calculatedSyntaxModelForNode(csmList.getFollowing(), node, elements, change);
                 }
             } else {
-                Collection collection = (Collection) change.getValue(csmList.getProperty(), node);
+                Collection<?> collection = (Collection<?>) change.getValue(csmList.getProperty(), node);
                 if (!collection.isEmpty()) {
                     calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
 
                     boolean first = true;
-                    for (Iterator it = collection.iterator(); it.hasNext(); ) {
+                    for (Iterator<?> it = collection.iterator(); it.hasNext(); ) {
                         if (!first) {
                             calculatedSyntaxModelForNode(csmList.getSeparatorPre(), node, elements, change);
                         }
@@ -272,8 +306,34 @@ class LexicalDifferenceCalculator {
             }
             elements.add(new CsmToken(csmAttribute.getTokenType(node, value.toString(), text), text));
         } else if ((csm instanceof CsmString) && (node instanceof StringLiteralExpr)) {
-            elements.add(new CsmToken(GeneratedJavaParserConstants.STRING_LITERAL,
-                    "\"" + ((StringLiteralExpr) node).getValue() + "\""));
+            // fix #2382:
+            // This method calculates the syntax model _after_ the change has been applied.
+            // If the given change is a PropertyChange, the returned model should
+            // contain the new value, otherwise the original/current value should be used.
+            if (change instanceof PropertyChange) {
+                elements.add(new CsmToken(GeneratedJavaParserConstants.STRING_LITERAL,
+                        "\"" + ((PropertyChange) change).getNewValue() + "\""));
+            } else {
+                elements.add(new CsmToken(GeneratedJavaParserConstants.STRING_LITERAL,
+                        "\"" + ((StringLiteralExpr) node).getValue() + "\""));
+            }
+        } else if ((csm instanceof CsmString) && (node instanceof TextBlockLiteralExpr)) {
+            // FIXME: csm should be CsmTextBlock -- See also #2677
+            if (change instanceof PropertyChange) {
+                elements.add(new CsmToken(GeneratedJavaParserConstants.TEXT_BLOCK_LITERAL,
+                        "\"\"\"" + ((PropertyChange) change).getNewValue() + "\"\"\""));
+            } else {
+                elements.add(new CsmToken(GeneratedJavaParserConstants.TEXT_BLOCK_LITERAL,
+                        "\"\"\"" + ((TextBlockLiteralExpr) node).getValue() + "\"\"\""));
+            }
+        } else if ((csm instanceof CsmChar) && (node instanceof CharLiteralExpr)) {
+            if (change instanceof PropertyChange) {
+                elements.add(new CsmToken(GeneratedJavaParserConstants.CHAR,
+                        "'" + ((PropertyChange) change).getNewValue() + "'"));
+            } else {
+                elements.add(new CsmToken(GeneratedJavaParserConstants.CHAR,
+                        "'" + ((CharLiteralExpr) node).getValue() + "'"));
+            }
         } else if (csm instanceof CsmMix) {
             CsmMix csmMix = (CsmMix)csm;
             List<CsmElement> mixElements = new LinkedList<>();
@@ -334,7 +394,7 @@ class LexicalDifferenceCalculator {
     }
 
     // Visible for testing
-    CalculatedSyntaxModel calculatedSyntaxModelAfterListRemoval(CsmElement csm, ObservableProperty observableProperty, NodeList nodeList, int index) {
+    CalculatedSyntaxModel calculatedSyntaxModelAfterListRemoval(CsmElement csm, ObservableProperty observableProperty, NodeList<?> nodeList, int index) {
         List<CsmElement> elements = new LinkedList<>();
         Node container = nodeList.getParentNodeForChildren();
         calculatedSyntaxModelForNode(csm, container, elements, new ListRemovalChange(observableProperty, index));
@@ -342,7 +402,7 @@ class LexicalDifferenceCalculator {
     }
 
     // Visible for testing
-    CalculatedSyntaxModel calculatedSyntaxModelAfterListAddition(CsmElement csm, ObservableProperty observableProperty, NodeList nodeList, int index, Node nodeAdded) {
+    CalculatedSyntaxModel calculatedSyntaxModelAfterListAddition(CsmElement csm, ObservableProperty observableProperty, NodeList<?> nodeList, int index, Node nodeAdded) {
         List<CsmElement> elements = new LinkedList<>();
         Node container = nodeList.getParentNodeForChildren();
         calculatedSyntaxModelForNode(csm, container, elements, new ListAdditionChange(observableProperty, index, nodeAdded));
@@ -356,7 +416,7 @@ class LexicalDifferenceCalculator {
         if (!(rawValue instanceof NodeList)) {
             throw new IllegalStateException("Expected NodeList, found " + rawValue.getClass().getCanonicalName());
         }
-        NodeList nodeList = (NodeList)rawValue;
+        NodeList<?> nodeList = (NodeList<?>)rawValue;
         return calculatedSyntaxModelAfterListAddition(csm, observableProperty, nodeList, index, nodeAdded);
     }
 
@@ -367,12 +427,12 @@ class LexicalDifferenceCalculator {
         if (!(rawValue instanceof NodeList)) {
             throw new IllegalStateException("Expected NodeList, found " + rawValue.getClass().getCanonicalName());
         }
-        NodeList nodeList = (NodeList)rawValue;
+        NodeList<?> nodeList = (NodeList<?>)rawValue;
         return calculatedSyntaxModelAfterListRemoval(csm, observableProperty, nodeList, index);
     }
 
     // Visible for testing
-    private CalculatedSyntaxModel calculatedSyntaxModelAfterListReplacement(CsmElement csm, ObservableProperty observableProperty, NodeList nodeList, int index, Node newValue) {
+    private CalculatedSyntaxModel calculatedSyntaxModelAfterListReplacement(CsmElement csm, ObservableProperty observableProperty, NodeList<?> nodeList, int index, Node newValue) {
         List<CsmElement> elements = new LinkedList<>();
         Node container = nodeList.getParentNodeForChildren();
         calculatedSyntaxModelForNode(csm, container, elements, new ListReplacementChange(observableProperty, index, newValue));

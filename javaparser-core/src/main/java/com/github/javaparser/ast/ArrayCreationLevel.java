@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -38,7 +38,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.Generated;
 
 /**
- * In <code>new int[1][2];</code> there are two ArrayCreationLevel objects,
+ * In {@code new int[1][2];} there are two ArrayCreationLevel objects,
  * the first one contains the expression "1",
  * the second the expression "2".
  */

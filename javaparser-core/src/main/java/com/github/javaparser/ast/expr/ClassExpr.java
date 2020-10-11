@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
- * Copyright (C) 2011, 2013-2019 The JavaParser Team.
+ * Copyright (C) 2011, 2013-2020 The JavaParser Team.
  *
  * This file is part of JavaParser.
  *
@@ -39,7 +39,7 @@ import com.github.javaparser.ast.Generated;
 
 /**
  * Defines an expression that accesses the class of a type.
- * <br/><code>Object.class</code>
+ * <br>{@code Object.class}
  *
  * @author Julio Vilmar Gesser
  */
